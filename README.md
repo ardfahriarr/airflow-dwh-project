@@ -13,7 +13,6 @@ Tujuan utama project ini adalah:
 - Merancang Data Warehouse dengan pendekatan star schema.
 - Mengolah data transaksi dan transaction items menjadi `fact_sales`.
 - Membentuk dimension table untuk customer, product, date, dan campaign.
-- Menyediakan dokumentasi mengenai arsitektur, data model, asumsi, serta cara menjalankan pipeline.
 
 ### Ruang Lingkup
 
@@ -59,7 +58,7 @@ Pipeline ETL pada project ini menggunakan PostgreSQL sebagai source/staging data
 end-to-end pipeline:
 
 ```text
-Source Data
+Source Data (dummy CSV files)
       >> Ingestion/Validation Pipeline
           >> PostgreSQL Staging
               >> Data Modelling Process
@@ -129,7 +128,6 @@ Struktur repository dirancang untuk memisahkan source data, pipeline orchestrati
 │   │   ├── 03_dim_date.sql
 │   │   ├── 04_dim_campaign.sql
 │   │   └── 05_fact_sales.sql
-│   │
 │   └── staging/
 │       └── create_staging.sql
 │
