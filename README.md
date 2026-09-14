@@ -60,10 +60,10 @@ end-to-end pipeline:
 ```text
 Source Data (dummy CSV files)
       >> Ingestion/Validation Pipeline
-          >> PostgreSQL Staging
-              >> Data Modelling Process
-                  >> Data Warehouse
-                      >> PostgreSQL DWH
+            >> PostgreSQL Staging
+                  >> Data Modelling Process
+                        >> Data Warehouse
+                              >> PostgreSQL DWH
 ```
 data flow:
 ```text
