@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+
+# Python build artifacts
+build/
+dist/
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Ruff Cache
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+
+# Environment & Secrets
+.env
+.env.*
+
+# Airflow runtime logs
+logs/
+
+# Temporary Data
+data/tmp/
+tmp/
+temp/
+*.tmp
+
+# Jupyter
+.ipynb_checkpoints/
