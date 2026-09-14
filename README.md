@@ -1,3 +1,5 @@
+#Airflow DWH Project
+
 ## 1. Gambaran Umum
 
 ### Tujuan
@@ -57,7 +59,12 @@ Pipeline ETL pada project ini menggunakan PostgreSQL sebagai source/staging data
 end-to-end pipeline:
 
 ```text
-Source Data >> Ingestion/Validation Pipeline >> PostgreSQL Staging >> Data Modelling Process >> Data Warehouse >> PostgreSQL DWH
+Source Data
+      >> Ingestion/Validation Pipeline
+          >> PostgreSQL Staging
+              >> Data Modelling Process
+                  >> Data Warehouse
+                      >> PostgreSQL DWH
 ```
 data flow:
 ```text
