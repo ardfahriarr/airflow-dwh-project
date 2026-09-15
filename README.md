@@ -808,3 +808,212 @@ Dengan demikian, responsibility setiap layer dapat dipisahkan sebagai berikut:
 | `sql/dwh/` | SQL transformation dan DWH loading |
 | PostgreSQL | Staging dan Data Warehouse storage |
 | Apache Airflow | Orchestration, scheduling, dependency, dan monitoring |
+
+## 9. How to Run
+
+Bagian ini menjelaskan langkah untuk menjalankan pipeline secara end-to-end dari sample data hingga Data Warehouse.
+
+### Step 1 - Start PostgreSQL
+
+Pastikan PostgreSQL container sudah berjalan:
+
+```bash
+docker compose up -d postgres
+```
+
+Verifikasi:
+
+```bash
+docker compose ps
+```
+
+---
+
+### Step 2 - Initialize Airflow
+
+Jalankan Airflow initialization:
+
+```bash
+docker compose run --rm airflow-init
+```
+
+Kemudian jalankan seluruh service:
+
+```bash
+docker compose up -d
+```
+
+Verifikasi DAG:
+
+```bash
+airflow dags list
+```
+
+Airflow UI dapat diakses melalui:
+
+```text
+http://localhost:8080
+```
+
+---
+
+### Step 3 - Create Staging Tables
+
+Buat staging tables menggunakan DDL yang tersedia pada:
+
+```text
+sql/staging/create_staging.sql
+```
+
+Jalankan melalui PostgreSQL:
+
+```sql
+\i sql/staging/create_staging.sql
+```
+
+Setelah berhasil, staging database siap menerima hasil ingestion.
+
+---
+
+### Step 4 - Generate and Load Sample Data
+
+Generate synthetic source data menggunakan notebook:
+
+```text
+scripts/data_generator.ipynb
+```
+
+Setelah notebook dijalankan, source CSV tersedia pada:
+
+```text
+data/sample/
+├── customers.csv
+├── marketing_campaigns.csv
+├── products.csv
+├── transaction_items.csv
+└── transactions.csv
+```
+
+Selanjutnya trigger ingestion DAG melalui Airflow untuk memuat data CSV ke staging.
+
+Daftar DAG dapat diperiksa dengan:
+
+```bash
+airflow dags list
+```
+
+Trigger ingestion DAG sesuai dependency yang telah ditentukan:
+
+```bash
+airflow dags trigger <ingestion_dag_id>
+```
+
+Setelah selesai, validasi data pada staging:
+
+```sql
+SELECT COUNT(*)
+FROM <staging_table>;
+```
+
+---
+
+### Step 5 - Load Data Warehouse
+
+Setelah staging berhasil terisi, jalankan dimension DAG:
+
+```text
+dim_customer_dag
+dim_product_dag
+dim_date_dag
+dim_campaign_dag
+```
+
+DAG dapat di-trigger melalui Airflow UI atau CLI:
+
+```bash
+airflow dags trigger <dag_id>
+```
+
+Setelah seluruh dimension selesai, jalankan fact pipeline:
+
+```bash
+airflow dags trigger fact_sales_dag
+```
+
+Dependency utama:
+
+```text
+Staging
+   │
+   ├──► dim_customer
+   ├──► dim_product
+   ├──► dim_date
+   └──► dim_campaign
+             │
+             ▼
+         fact_sales
+```
+
+---
+
+### Step 6 - Validate Results
+
+Setelah pipeline selesai, periksa status DAG melalui Airflow UI.
+
+Kemudian validasi tabel Data Warehouse menggunakan PostgreSQL:
+
+```sql
+SELECT COUNT(*) FROM dim_customer;
+
+SELECT COUNT(*) FROM dim_product;
+
+SELECT COUNT(*) FROM dim_date;
+
+SELECT COUNT(*) FROM dim_campaign;
+
+SELECT COUNT(*) FROM fact_sales;
+```
+
+Sample data dapat diperiksa menggunakan:
+
+```sql
+SELECT *
+FROM fact_sales
+LIMIT 10;
+```
+
+---
+
+## 10. Expected Result
+
+Setelah seluruh pipeline berhasil dijalankan, Data Warehouse akan memiliki dimension tables dan fact table yang siap digunakan untuk analytical workload.
+
+### Dimension Tables
+
+Dimension yang dihasilkan:
+
+```text
+dim_customer
+dim_product
+dim_date
+dim_campaign
+```
+
+Masing-masing dimension memiliki surrogate key yang digunakan sebagai reference pada `fact_sales`.
+
+Verifikasi:
+
+```sql
+SELECT COUNT(*) FROM dim_customer;
+SELECT COUNT(*) FROM dim_product;
+SELECT COUNT(*) FROM dim_date;
+SELECT COUNT(*) FROM dim_campaign;
+```
+
+`dim_date` menyediakan calendar data untuk periode:
+
+```text
+2020-01-01 sampai 2030-12-31
+```
+
+---
