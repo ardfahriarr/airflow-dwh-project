@@ -307,38 +307,12 @@ Airflow digunakan sebagai orchestration layer untuk menjalankan dan mengatur dep
 
 Pastikan environment variables yang dibutuhkan Airflow sudah tersedia sebelum melakukan initialization.
 
-Jika menggunakan Docker Compose, build dan start service:
-
-```bash
-docker compose up -d
-```
-
-Periksa seluruh service:
-
-```bash
-docker compose ps
-```
-
-Untuk melihat log Airflow:
-
-```bash
-docker compose logs -f airflow-apiserver
-```
-
-Jika menggunakan service Airflow yang berbeda pada `docker-compose.yaml`, gunakan nama service yang sesuai dengan compose configuration.
-
 #### Initialize Airflow Database
 
-Sebelum Airflow digunakan untuk pertama kali, metadata database perlu diinisialisasi atau dimigrasikan:
+Sebelum Airflow digunakan untuk pertama kali, metadata database perlu diinisialisasi atau dimigrasikan. Pada project ini, langkah tersebut dapat dilakukan dengan menggunakan command yang terdapat pada file `Makefile` dengan perintah:
 
 ```bash
-docker compose run --rm airflow-init
-```
-
-Jika project menggunakan initialization command yang berbeda pada `makefile`, command tersebut dapat digunakan sebagai alternatif:
-
-```bash
-make airflow-init
+make init
 ```
 
 Kemudian setelah selesai, run docker-compose.yaml dengan perintah:
@@ -396,13 +370,13 @@ Buat connection dengan parameter yang sesuai dengan PostgreSQL configuration.
 Contoh:
 
 ```text
-Connection ID : postgres_dwh
+Connection ID  : postgres_dwh
 Connection Type: PostgreSQL
-Host          : postgres
-Port          : 5432
-Database      : airflow_dwh
-Username      : airflow
-Password      : airflow
+Host           : postgres
+Port           : 5432
+Database       : airflow_dwh
+Username       : airflow
+Password       : airflow
 ```
 
 > Jika Airflow berjalan di dalam Docker Compose dan PostgreSQL juga berjalan sebagai service di dalam Docker Compose network, gunakan nama service PostgreSQL sebagai `Host`, bukan `localhost`.
@@ -538,11 +512,12 @@ dags/
 DAG yang berkaitan dengan proses ingestion antara lain:
 
 ```text
-dags/
-├── ingestion.py
-├── ingestion_master.py
-├── ingestion_transaction.py
-└── ingestion_transaction_item.py
+├── dags/
+│   ├── common/
+│   │   ├── ingestion.py
+│   ├── ingestion_master.py
+│   ├── ingestion_transaction.py
+│   ├── ingestion_transaction_item.py
 ```
 
 Airflow bertanggung jawab untuk membaca source CSV dan melakukan proses ingestion ke staging table.
